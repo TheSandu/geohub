@@ -1,0 +1,37 @@
+@import "https://js.arcgis.com/4.19/@arcgis/core/assets/esri/themes/light/main.css";
+
+.hex {
+  transform: rotate(30deg);
+  margin-top: 35px;
+  width: 52px;
+  height: 30px;
+  background: #6C6;
+  position: relative;
+}
+.hex:before, .hex:after {
+  content:"";
+  border-left: 26px solid transparent;
+  border-right: 26px solid transparent;
+  position: absolute;
+}
+.hex:before {
+  top: -14px;
+  border-bottom: 15px solid #6C6;
+}
+.hex:after {
+  bottom: -14px;
+  border-top: 15px solid #6C6;
+}
+.hex.inner {
+  background-color:blue;
+  -webkit-transform: scale(.8, .8);
+  -moz-transform: scale(.8, .8);
+  transform: scale(.8, .8);
+  z-index:1;
+}
+.hex.inner:before {
+  border-bottom: 15px solid blue;
+}
+.hex.inner:after {
+  border-top: 15px solid blue;
+}
