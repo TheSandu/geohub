@@ -34,7 +34,7 @@ export default function EditWidget({ saveGraph, startDraw = null, onAttributesSe
         setAttributes( startAttributes );
         setMode("update");
       } else {
-        setMode("update");
+        setMode("create");
       }
 
       setGeometry( graphic );
