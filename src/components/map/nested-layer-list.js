@@ -15,18 +15,20 @@ import EditIcon from '@mui/icons-material/Edit';
 
 export default function NestedList({
   view,
+  groups = [],
   layers = [],
   toggleMapLayer = null,
   onEditDisable = null,
   onEditEnable = null,
   ...props }) {
-  const [open, setOpen] = React.useState(false);
   const [editedLayer, setEditedLayer] = React.useState(null);
+  const [editedGroup, setEditedGroup] = React.useState(null);
   const [disabledLayers, setDisabledLayers] = React.useState([]);
 
-
-  const handleClick = () => {
-    setOpen(!open);
+  const openGroupCollapse = ( id ) => {
+    setEditedGroup( id === editedGroup ? null : id );
+    setEditedLayer( null );
+    onEditDisable();
   };
 
   const toggleLayer = ( index ) => ( ) => {
@@ -50,14 +52,16 @@ export default function NestedList({
     }
   };
 
-  const toggleEditLayer = ( index ) => () => {
+  const toggleEditLayer = ({ layer_id, group_id }) => () => {
 
-    if( editedLayer == index ) {
+    // editedGroup === group.id && editedLayer == layer.id
+
+    if( editedLayer === layer_id && editedGroup === group_id ) {
       setEditedLayer( null );
       onEditDisable();
     } else {
-      setEditedLayer( index );
-      onEditEnable( layers[ index ].mapId );
+      setEditedLayer( layer_id );
+      onEditEnable({ layer_id: layer_id, group_id: group_id });
     }
   };
 
@@ -66,51 +70,58 @@ export default function NestedList({
       sx={{ width: '300px', maxWidth: 360, bgcolor: 'background.paper' }}
       component="nav"
       aria-labelledby="nested-list-subheader"
-      { ...props }
     >
-      <ListItemButton onClick={handleClick}>
-        <ListItemIcon>
-          <MapIcon />
-        </ListItemIcon>
+      {
+        groups.map((group) => {
+          return(
+            <div key={ group.id }>
+              <ListItemButton onClick={() => openGroupCollapse( group.id ) }>
+                <ListItemIcon>
+                  <MapIcon />
+                </ListItemIcon>
 
-        <ListItemText primary={ !open && editedLayer != null ? layers[ editedLayer ].name : "Layers" } />
+                <ListItemText primary={ group.name } />
 
-        {open ? <ExpandLess /> : <ExpandMore />}
+                { editedGroup === group.id ? <ExpandLess /> : <ExpandMore />}
 
-      </ListItemButton>
-      <Collapse in={open} timeout="auto" unmountOnExit>
-        <List component="div" disablePadding>
+              </ListItemButton>
+              {
 
-          { layers.map((layer, index) => {
-            return (
-            <ListItem key={ index } sx={{ pl: 4 }}>
-              <ListItemIcon>
-                <IconButton
-                 onClick={ toggleLayer( index ) }
-                >
-                  { disabledLayers.find( layerId => layerId == index ) !== undefined ? <LayersClearIcon /> : <LayersIcon/>}
-                </IconButton>
-              </ListItemIcon>
-              <ListItemText primary={ layer.name } />
+                <Collapse in={ editedGroup === group.id } timeout="auto" unmountOnExit>
+                  <List component="div" disablePadding>
 
-              <IconButton
-              onClick={ toggleEditLayer( index ) }
-              sx={ editedLayer == index ?
-                {
-                  backgroundColor: "#ccc",
-                  borderRadius: "10px",
-                }
-              : null}
-              >
-                <EditIcon
-                  color={ editedLayer == index ? "primary" : "" }
-                />
-              </IconButton>
+                    { group.layers.map((layer, index) => {
+                      return (
+                        <ListItem key={ index } sx={{ pl: 4 }}>
+                          <ListItemIcon>
+                            <IconButton onClick={ toggleLayer( index ) }>
+                              { disabledLayers.find( layerId => layerId == index ) !== undefined ? <LayersClearIcon /> : <LayersIcon/>}
+                            </IconButton>
+                          </ListItemIcon>
+                          <ListItemText primary={ layer.name } />
 
-            </ListItem>)
-          })}
-        </List>
-      </Collapse>
+                          <IconButton
+                            onClick={ toggleEditLayer({ layer_id: layer.id,group_id: group.id }) }
+                            sx={
+                              editedGroup === group.id && editedLayer == layer.id ?
+                                { backgroundColor: "#ccc", borderRadius: "10px", }
+                                : null
+                            }>
+                            <EditIcon
+                              color={ editedGroup === group.id && editedLayer === layer.id ? "primary" : "" }
+                            />
+                          </IconButton>
+
+                        </ListItem>)
+                    })}
+                  </List>
+                </Collapse>
+
+              }
+            </div>
+          )
+        })
+      }
     </List>
   );
 }

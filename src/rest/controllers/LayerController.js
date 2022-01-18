@@ -43,7 +43,47 @@ export default class LayerController {
     return response.data.data;
   }
 
-  async addGraphicToLayer({ layer_id, type, geometry, attributes, extent }) {
+  async getLayerBordering({ layerId, groupId }) {
+    let response = await axios.post('http://localhost:8000/api/layer/getLayerBordering', {
+      layer_id: layerId,
+      group_id: groupId,
+    });
+
+    if( !response.data )
+      return false;
+
+    return response.data.data;
+  }
+
+  async getUserLayerBordering({ layerId, groupId }) {
+    let response = await axios.post('http://localhost:8000/api/layer/getUserLayerBordering', {
+      layer_id: layerId,
+      group_id: groupId,
+    });
+
+    if( !response.data )
+      return false;
+
+    return response.data.data;
+  }
+
+  async addBorder({ layer_id, group_id, geometry, attributes, extent }) {
+
+    let response = await axios.post( "http://localhost:8000/api/layer/addBorder", {
+      layer_id: layer_id,
+      group_id: group_id,
+      geometry: geometry,
+      attributes: attributes,
+      extent: extent,
+    });
+
+    if( !response.data )
+      return false;
+
+    return response.data.data;
+  }
+
+  async addGraphicToLayer({ layer_id, type, geometry, attributes, extent, user_id }) {
 
     let response = await axios.post( "http://localhost:8000/api/layer/addGraphicToLayer", {
       layer_id: layer_id,
@@ -51,6 +91,7 @@ export default class LayerController {
       geometry: geometry,
       attributes: attributes,
       extent: extent,
+      user_id: user_id,
     });
 
     if( !response.data )
@@ -91,6 +132,18 @@ export default class LayerController {
       geometry: geometry,
       attributes: attributes,
       extent: extent,
+    });
+
+    if( !response.data )
+      return false;
+
+    return response.data.data;
+  }
+
+  async deleteLayerGraphic({layer_id, graphic_id}) {
+    let response = await axios.post( "http://localhost:8000/api/layer/deleteLayerGraphic", {
+      layer_id: layer_id,
+      graphic_id: graphic_id,
     });
 
     if( !response.data )

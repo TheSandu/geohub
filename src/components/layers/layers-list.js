@@ -11,27 +11,31 @@ import SimpleListMenu from '../simple-menu';
 import { useEffect, useState } from 'react';
 import GroupConroller from '../../rest/controllers/GroupConroller';
 import LayerController from '../../rest/controllers/LayerController';
+import chunk from '../../utils/chunk-items';
 
 let GroupInstance = new GroupConroller();
 let LayerInstance = new LayerController();
 
 export function LayersList({ removeLayer, layersList = [], stickPaginBottom = false ,...props }) {
 
-  const [layers, setLayers] = useState( layersList );
+  const [page, setPage] = useState(1);
 
-  useEffect(() => {
-    setLayers( layersList );
-  });
+  let paginatedLayers = chunk( layersList, 5 );
 
   return (
     <Card {...props}>
-      <CardHeader title="Layers" />
+      <CardHeader title={
+        <>
+          <span className="esri-icon-layers" style={{ paddingRight: "3px" }}></span>
+          {'Layers'}
+        </>
+      }/>
       <Divider />
       <Box>
         <PerfectScrollbar >
           <Box sx={{ minHeight: "100%" }}>
             <List >
-              { layers.map( ( layer ) => {
+              { paginatedLayers[ page - 1 ] ? paginatedLayers[ page - 1 ].map( ( layer ) => {
                 return (
                   <ListItem
                     key={ layer.id }
@@ -72,7 +76,7 @@ export function LayersList({ removeLayer, layersList = [], stickPaginBottom = fa
                   </ListItem>
                 );
               })
-
+              : null
               }
             </List>
           </Box>
@@ -91,11 +95,19 @@ export function LayersList({ removeLayer, layersList = [], stickPaginBottom = fa
             p: 2,
           }}
         >
-          <Pagination
-            color="primary"
-            count={3}
-            size="small"
-          />
+          {
+            paginatedLayers.length > 1
+              ?
+                <Pagination
+                  color="primary"
+                  page={ page }
+                  onChange={ ( event, value ) => { setPage( value ) }}
+                  count={ paginatedLayers.length }
+                  size="small"
+                />
+              :
+                null
+          }
         </Box>
       </Box>
     </Card>

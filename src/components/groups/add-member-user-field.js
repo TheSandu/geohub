@@ -5,7 +5,7 @@ import {
 } from '@mui/material';
 import UserController from '../../rest/controllers/UserController';
 
-export const AddMemberUserField = ({ onSelectUser = null , ...props }) => {
+export const AddMemberUserField = ({ onSelectUser = null, group, ...props }) => {
   const [, setInputValue] = useState("");
   const [options, setOptions] = useState([]);
 
@@ -19,7 +19,7 @@ export const AddMemberUserField = ({ onSelectUser = null , ...props }) => {
       return;
     }
 
-    UserInstance.getUsersByName( event.target.value )
+    UserInstance.getUsersByName( event.target.value, group )
     .then(function (data) {
 
       setOptions( data );
@@ -51,13 +51,13 @@ export const AddMemberUserField = ({ onSelectUser = null , ...props }) => {
       renderInput={(params) => (
         <TextField
           {...params}
-          helperText="Please select group"
           label="Select user"
           variant="standard"
           fullWidth
           onChange={handleRoleChange}
         />
       )}
+      { ...props }
     />
   );
 };

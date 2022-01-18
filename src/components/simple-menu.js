@@ -55,17 +55,17 @@ export default function SimpleListMenu({ children }) {
                 open={Boolean(anchorEl)}
                 onClose={handleClose}
             >
-                {children.map((item, index) => {
+                {children.length ? children.map((item, index) => {
                     if (item == null) return;
                     return (<MenuItem
                         key={index}
-                        // disabled={index === 0}
+                        disabled={ item.props.disabled }
                         // selected={index === selectedIndex}
                         onClick={(event) => handleMenuItemClick(event, index)}
                     >
                         {item}
                     </MenuItem>)
-                })}
+                }) : null}
             </Menu>
         </div>
     );

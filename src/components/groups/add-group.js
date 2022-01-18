@@ -30,10 +30,8 @@ export const AddGroup = ({ groupId, addGroup = null ,...props }) => {
       name: values
     });
 
-    if( addGroup !== null && groupId === group.id)
-      addGroup( group );
+    addGroup( group );
 
-    NotificationInstance.success( "Done" );
     setValues("");
   };
 

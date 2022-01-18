@@ -19,25 +19,30 @@ import { SeverityPill } from '../severity-pill';
 import SimpleListMenu from "../simple-menu";
 
 import GroupConroller from '../../rest/controllers/GroupConroller';
+import chunk from '../../utils/chunk-items';
 
 let GroupInstance = new GroupConroller();
 export const MembersList = ({ removeMember = null, membersList = [], groupId = null, ...props }) => {
 
-  const [members, setMembers] = useState(membersList);
+  const [page, setPage] = useState(1);
 
-  useEffect(() => {
-      setMembers( membersList );
-  });
+  let paginatedMembers = chunk( membersList, 5 );
 
   return(
     <Card {...props}>
-      <CardHeader title="Members" />
+      <CardHeader
+        title={
+          <>
+            <span className="esri-icon-user" style={{ paddingRight: "3px" }}></span>
+            {'Members'}
+          </>
+        }/>
       <Divider />
       <Box>
         <PerfectScrollbar >
           <Box sx={{ minHeight: "100%" }}>
             <List>
-              {members.map((member) => (
+              {paginatedMembers[ page - 1 ] ? paginatedMembers[ page - 1 ].map((member) => (
                 <ListItem
                   key={ member.id }
                   disablePadding
@@ -51,7 +56,7 @@ export const MembersList = ({ removeMember = null, membersList = [], groupId = n
                           </Grid>
                           <Grid item xs={6}>
                             <SeverityPill
-                              color={ 'success' }
+                              color={ member.pivot.user_role.toLowerCase() === "owner" ? 'primary' : 'secondary' }
                             >
                               { member.pivot.user_role }
                             </SeverityPill>
@@ -59,25 +64,32 @@ export const MembersList = ({ removeMember = null, membersList = [], groupId = n
                         </Grid>
                       }
                     />
-                    <SimpleListMenu>
-                      <Typography
-                        onClick={ () => {
-                          GroupInstance.detachMemberFromGroup( member.pivot )
-                            .then(( response ) => {
-                              if( removeMember !== null )
-                                removeMember( member.id );
-                            });
-                        }}
-                        variant="body2">
-                        Remove member
-                      </Typography>
-                      <Typography
-                        variant="body2">
-                      </Typography>
-                    </SimpleListMenu>
+
+                      <SimpleListMenu>
+                        <Typography
+                          disabled={ member.pivot.user_role.toLowerCase() === "owner" }
+                          onClick={() => {
+                            GroupInstance.detachMemberFromGroup(member.pivot)
+                                         .then((response) => {
+                                           if (removeMember !== null) {
+                                             removeMember(member.id);
+                                           }
+                                         });
+                          }}
+                          variant="body2">
+                          Remove member
+                        </Typography>
+                        <Typography
+                          variant="body2">
+                        </Typography>
+                      </SimpleListMenu>
+
                   </ListItemButton>
                 </ListItem>
-              ))}
+              ))
+              :
+                null
+              }
             </List>
           </Box>
         </PerfectScrollbar>
@@ -95,11 +107,19 @@ export const MembersList = ({ removeMember = null, membersList = [], groupId = n
               p: 2,
             }}
           >
-            <Pagination
-              color="primary"
-              count={3}
-              size="small"
-            />
+            {
+              paginatedMembers.length > 1
+                ?
+                <Pagination
+                  color="primary"
+                  page={ page }
+                  onChange={ ( event, value ) => { setPage( value ) }}
+                  count={ paginatedMembers.length }
+                  size="small"
+                />
+                :
+                null
+            }
           </Box>
         </Box>
 

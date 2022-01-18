@@ -14,6 +14,9 @@ import {
   Typography
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import UserController from '../rest/controllers/UserController';
+
+let UserInstance = new UserController();
 
 const Register = () => {
   const router = useRouter();
@@ -21,41 +24,45 @@ const Register = () => {
     initialValues: {
       email: '',
       firstName: '',
-      lastName: '',
       password: '',
+      confirmPassword: '',
       policy: false
     },
     validationSchema: Yup.object({
       email: Yup
         .string()
-        .email(
-          'Must be a valid email')
-        .max(255)
-        .required(
-          'Email is required'),
+        .email('Must be a valid email')
+        .min(5, "Passwords must be more then 5")
+        .max(50, "Passwords must be less then 50")
+        .required('Email is required'),
       firstName: Yup
         .string()
-        .max(255)
-        .required(
-          'First name is required'),
-      lastName: Yup
-        .string()
-        .max(255)
-        .required(
-          'Last name is required'),
+        .min(5, "Passwords must be more then 5")
+        .max(50, "Passwords must be less then 50")
+        .required('First name is required'),
       password: Yup
         .string()
-        .max(255)
-        .required(
-          'Password is required'),
+        .min(5, "Passwords must be more then 5")
+        .max(50, "Passwords must be less then 50")
+        .required('Password is required'),
+      confirmPassword: Yup
+        .string()
+        .oneOf([Yup.ref('password'), null], 'Passwords must match')
+        .required('Password confirmation is required'),
       policy: Yup
         .boolean()
-        .oneOf(
-          [true],
-          'This field must be checked'
-        )
+        .oneOf([true], 'This field must be checked')
     }),
-    onSubmit: () => {
+    onSubmit: async ( values ) => {
+      console.log( "Register complete", values );
+
+      let user = await UserInstance.register({
+        name: values.firstName,
+        email: values.email,
+        password: values.password,
+        confirm_password: values.confirmPassword,
+      });
+
       router.push('/');
     }
   });
@@ -104,6 +111,9 @@ const Register = () => {
                 Use your email to create a new account
               </Typography>
             </Box>
+
+
+
             <TextField
               error={Boolean(formik.touched.firstName && formik.errors.firstName)}
               fullWidth
@@ -116,18 +126,9 @@ const Register = () => {
               value={formik.values.firstName}
               variant="outlined"
             />
-            <TextField
-              error={Boolean(formik.touched.lastName && formik.errors.lastName)}
-              fullWidth
-              helperText={formik.touched.lastName && formik.errors.lastName}
-              label="Last Name"
-              margin="normal"
-              name="lastName"
-              onBlur={formik.handleBlur}
-              onChange={formik.handleChange}
-              value={formik.values.lastName}
-              variant="outlined"
-            />
+
+
+
             <TextField
               error={Boolean(formik.touched.email && formik.errors.email)}
               fullWidth
@@ -141,6 +142,9 @@ const Register = () => {
               value={formik.values.email}
               variant="outlined"
             />
+
+
+
             <TextField
               error={Boolean(formik.touched.password && formik.errors.password)}
               fullWidth
@@ -154,6 +158,23 @@ const Register = () => {
               value={formik.values.password}
               variant="outlined"
             />
+
+            <TextField
+              error={Boolean(formik.touched.confirmPassword && formik.errors.confirmPassword)}
+              fullWidth
+              helperText={formik.touched.confirmPassword && formik.errors.confirmPassword}
+              label="Confirm Password"
+              margin="normal"
+              name="confirmPassword"
+              onBlur={formik.handleBlur}
+              onChange={formik.handleChange}
+              type="password"
+              value={formik.values.confirmPassword}
+              variant="outlined"
+            />
+
+
+
             <Box
               sx={{
                 alignItems: 'center',

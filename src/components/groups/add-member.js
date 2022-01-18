@@ -35,7 +35,7 @@ export const AddMember = ({ onSelectUser = null, addMember = null, groupId = nul
     GroupInstance.attachMemberToGroup({
       user_id: user.id,
       group_id: group.id,
-      role: role,
+      role: "editor",
     }).then(( member ) => {
       if( groupId === group.id )
         addMember();
@@ -76,18 +76,6 @@ export const AddMember = ({ onSelectUser = null, addMember = null, groupId = nul
 
                 setUser( user );
               }} />
-            </Grid>
-
-            <Grid item md={12} xs={12}>
-              <TextField
-                style={{ minWidth: "100%" }}
-                onChange={ ( event ) => {
-                  setRole( event.target.value )
-                }}
-                helperText="Please specify the member role"
-                id="standard-basic"
-                label="Role"
-                variant="standard" />
             </Grid>
 
           </Grid>

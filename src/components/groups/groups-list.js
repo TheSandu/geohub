@@ -16,13 +16,16 @@ import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import GroupConroller from "../../rest/controllers/GroupConroller";
 import SimpleListMenu from '../simple-menu';
 import Notification from '../../utils/notification';
+import chunk from '../../utils/chunk-items';
 
 let GroupInstance = new GroupConroller();
 
 export const GroupsList = ({ removeGroup = null, groups = [],stickPaginBottom, onGroupSelectEvent = null, ...props }) => {
   const [selectedGroup, setSelectedGroup] = useState( null );
-  const [allGroups, setAllGroups] = useState( groups );
   const [selectionGroup, setSelectionGroup] = useState(null);
+
+  const [page, setPage] = useState(1);
+  let paginatedGroups = chunk( groups, 5 );
 
   const NotificationInstance = new Notification();
 
@@ -45,6 +48,14 @@ export const GroupsList = ({ removeGroup = null, groups = [],stickPaginBottom, o
     }
   }
 
+  useEffect(() => {
+    if( groups.length === 0 )
+      return;
+
+    onGroupSelect( groups[0].id )();
+    onGroupSelected( groups[0].id )();
+  }, [groups]);
+
   const onGroupDeselect = () => {
     setSelectionGroup(null);
   }
@@ -53,13 +64,18 @@ export const GroupsList = ({ removeGroup = null, groups = [],stickPaginBottom, o
     <Card {...props}>
       <CardHeader
         subtitle={`${groups.length} in total`}
-        title="Groups"
+        title={
+        <>
+          <span className="esri-icon-group" style={{ paddingRight: "3px" }}></span>
+          {'Groups'}
+        </>
+        }
       />
       <Divider/>
       <List
         onMouseLeave={ onGroupDeselect }
       >
-        {groups.map((group) => (
+        {paginatedGroups[ page - 1 ] ? paginatedGroups[ page - 1 ].map((group) => (
           <ListItemButton
             key={ group.id }>
             <ListItem
@@ -72,8 +88,7 @@ export const GroupsList = ({ removeGroup = null, groups = [],stickPaginBottom, o
                   <IconButton edge="end" aria-label="more">
                     <ArrowForwardIcon />
                   </IconButton>
-                :
-                  null
+                : null
               }
             >
               <ListItemText
@@ -84,8 +99,6 @@ export const GroupsList = ({ removeGroup = null, groups = [],stickPaginBottom, o
             <SimpleListMenu>
               <Typography
                 onClick={ () => {
-
-
                   GroupInstance.deleteGroup( group.id )
                     .then(( response ) => {
                       if( removeGroup !== null )
@@ -101,7 +114,9 @@ export const GroupsList = ({ removeGroup = null, groups = [],stickPaginBottom, o
               </Typography>
             </SimpleListMenu>
           </ListItemButton>
-        ))}
+        ))
+        : null
+        }
       </List>
       <Box sx={{
         width: "100%",
@@ -118,11 +133,19 @@ export const GroupsList = ({ removeGroup = null, groups = [],stickPaginBottom, o
             // margin: "0 32%",
           }}
         >
-          <Pagination
-            color="primary"
-            count={3}
-            size="small"
-          />
+          {
+            paginatedGroups.length > 1
+              ?
+              <Pagination
+                color="primary"
+                page={ page }
+                onChange={ ( event, value ) => { setPage( value ) }}
+                count={ paginatedGroups.length }
+                size="small"
+              />
+              :
+              null
+          }
         </Box>
       </Box>
     </Card>
